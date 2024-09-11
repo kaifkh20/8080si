@@ -31,7 +31,7 @@ typedef struct{
 }State8080;
 
 void UnimplementedInstruction(State8080* state);
-int Emulate8080(State8080* state);
-
+void Emulate8080(State8080* state);
+State8080* Init8080(void);
 
 #endif

@@ -2,17 +2,19 @@
 #include <stdlib.h>
 
 #include "disassembler.h"
-
+ //#include "emulator.h"
 
 /*
  * Prints out the mnemonic
  * Returns the size of the operation in bytes
  * http://www.emulator101.com/reference/8080-by-opcode.html
  */
-int Disassemble8080(unsigned char *codebuffer, int pc) {
-    unsigned char *code = &codebuffer[pc]; // pointer to the pc-th element in the codebuffer array
+int Disassemble8080(State8080* state,int fsize) {
+    unsigned char *code = &state->memory[state->pc]; // pointer to the pc-th element in the codebuffer array
     int opbytes = 1;  // size of operation to be returned
-    printf("%04x ", pc); // formatted as hexadecimal integer
+    printf("%04x\t", state->pc); // formatted as hexadecimal integer
+    
+    printf("%04x\t",*code);
 
     switch(*code) {
         case 0x00: printf("NOP"); break;    
@@ -273,3 +275,11 @@ int Disassemble8080(unsigned char *codebuffer, int pc) {
     printf("\n");
     return opbytes;
 }
+
+void DisassembleHelper(State8080* state,int fsize){
+    while(state->pc < fsize){
+        int opbytes = Disassemble8080(state,fsize);
+        state->pc+=opbytes;
+    }
+}
+

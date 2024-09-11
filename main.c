@@ -2,8 +2,10 @@
 #include <stdlib.h>
 
 #include "disassembler.h"
-int main(int argc, char* argv[]){
-	FILE *f = fopen(argv[1],"rb");
+#include "emulator.h"
+
+int ReadFileIntoMemoryAt(State8080* state,char* filename,uint32_t offset){
+	FILE *f = fopen(filename,"rb");
 	if(f==NULL){
 		printf("couldn't read the file");
 		exit(1);
@@ -13,17 +15,19 @@ int main(int argc, char* argv[]){
 	int fsize = ftell(f);
 	fseek(f,0L,SEEK_SET);
 
-	unsigned char *buffer = malloc(fsize);
+	unsigned char *buffer = &state->memory[offset];
 	fread(buffer,fsize,1,f);
 	fclose(f);
 
-	int pc = 0;
+	return fsize;	
+//	return 0;
 
-	while(pc<fsize){
-		pc+=Disassemble8080(buffer,pc);
-	}
+}
 
-	return 0;
+int main(int argc,char* argv[]){
+	State8080* state = Init8080();
 
+	int fsize = ReadFileIntoMemoryAt(state,argv[0],0);
+	DisassembleHelper(state,fsize);
 }
 

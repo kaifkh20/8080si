@@ -1,3 +1,9 @@
+#ifndef DISASSEMBLE_H
 
-int Disassemble8080(unsigned char* codebuffer,int pc);
+#define DISASSEMBLE_H
+#include "emulator.h"
 
+void DisassembleHelper(State8080* state,int fsize);
+int Disassemble8080(State8080* state,int fsize);
+
+#endif
