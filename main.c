@@ -28,6 +28,10 @@ int main(int argc,char* argv[]){
 	State8080* state = Init8080();
 
 	int fsize = ReadFileIntoMemoryAt(state,argv[0],0);
-	DisassembleHelper(state,fsize);
+//	DisassembleHelper(state,fsize);
+	while(1){
+		Emulate8080(state);
+		state->pc++;
+	}
 }
 
