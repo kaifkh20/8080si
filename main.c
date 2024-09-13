@@ -47,11 +47,12 @@ int main(int argc,char* argv[]){
 		return 0;
 	}
 
-	while(state->pc<fsize){
+	while(state->pc<fsize+0x100){
 		Emulate8080(state);
 		//if(state->pc==0x108) break;
 		state->pc++;
 	}	
+	printf("EMULATION FINISHED\n");
 
 
 }
