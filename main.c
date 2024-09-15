@@ -27,7 +27,14 @@ int ReadFileIntoMemoryAt(State8080* state,char* filename,uint32_t offset){
 
 int main(int argc,char* argv[]){
 	State8080* state = Init8080();
-	int fsize = ReadFileIntoMemoryAt(state,argv[0],0x100);
+	//printf("ARGC : %d\n",argc);
+	
+	if(argc<2){
+		printf("No rom provided\n");
+		exit(1);
+	}
+
+	int fsize = ReadFileIntoMemoryAt(state,argv[1],0x100);
 	
 	state->memory[0] = 0xc3;
 	state->memory[1] = 0;
@@ -41,19 +48,20 @@ int main(int argc,char* argv[]){
 	state->memory[0x59d] = 0xc2;    
 	state->memory[0x59e] = 0x05;    
 
-
-	if(argc>2 && strcmp(argv[2],"-d")==0){
+	if(argc>2 && strncmp(argv[2],"-d",1)==0){
+		printf("DISASSEMBLER CALLED\n");
 		DisassembleHelper(state,fsize);
 		return 0;
 	}
+	
+	//Emulate8080(state);
 
-	while(state->pc<fsize+0x100){
+	while(state->pc<fsize){
 		Emulate8080(state);
 		//if(state->pc==0x108) break;
-		state->pc++;
 	}	
 	printf("EMULATION FINISHED\n");
-
+	
 
 }
 

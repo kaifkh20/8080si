@@ -48,16 +48,17 @@ void Emulate8080(State8080* state){
     //state->pc +=1;
 
     switch(*opcode){
-        case 0x00: break;
+        case 0x00: state->pc++;break;
         case 0x01:{
             state->c = opcode[1];
             state->b = opcode[2];
-            state->pc+=2;
+            state->pc+=3;
             break;
         }
         case 0x02:{
             uint16_t bc = (state->b<<8)|state->c;
             state->memory[bc] = state->a;
+            state->pc++;
             break;
         }
         case 0x03:{
@@ -65,6 +66,7 @@ void Emulate8080(State8080* state){
             state->c++;
             if(state->c==0)
                 state->b++;
+            state->pc++;
             break;
         }
         case 0x04:{
@@ -73,6 +75,7 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x05:{
@@ -81,19 +84,22 @@ void Emulate8080(State8080* state){
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
             state->b = res;
+            state->pc++;
             break;
         }
         case 0x06:{
             state->b = opcode[1];
-            state->pc+=1;
+            state->pc+=2;
             break;
         }
         case 0x07:{
             state->a<<=1;
             state->cc.cy = (1==(state->a&1));
+            state->pc++;
             break;
         }
         case 0x08:{
+            state->pc++;
             break;
         }
         case 0x09:{
@@ -103,27 +109,34 @@ void Emulate8080(State8080* state){
             state->h = (res&0xff00) >> 8;
             state->l = res&0xff;
             state->cc.cy = ((res&0xffff0000) > 0);
+            state->pc++;
+            break;
         }
         case 0x10:{
+            state->pc++;
             break;
         }
         case 0x11:{
             state->e = opcode[1];
             state->d = opcode[2];
             state->pc+=2;
+            state->pc++;
             break;
         }
         case 0x12:{
             uint16_t offset = state->d<<8 | state->e;
             state->memory[offset] = state->a;
+            state->pc++;
             break;
         }
         case 0x13:{
             state->e++;
             if(state->e==0) state->d++; //if the e overflows and become 0 then we increment d to mimic de+1
+            state->pc++;
             break;
         }
         case 0x18:{
+            state->pc++;
             break;
         }
         case 0x19:{
@@ -133,6 +146,7 @@ void Emulate8080(State8080* state){
             state->h = (res&0xff00)>>8;
             state->l = res&0xff;
             state->cc.cy = ((res&0xffff0000)!=0);
+            state->pc++;
             break;
         }
         case 0x14:{
@@ -141,7 +155,8 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
-
+            state->pc++;
+            break;
         }
         case 0x15:{
             uint8_t res = state->d-1;
@@ -149,11 +164,13 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x0a:{
             uint16_t offset = state->b<<8 | state->c;
             state->a=state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x0c:{
@@ -162,6 +179,7 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x0d:{
@@ -170,22 +188,25 @@ void Emulate8080(State8080* state){
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
             state->c = res;
+            state->pc++;
             break;
 
         }
         case 0x0e:{
             state->c = opcode[1];
-            state->pc +=1;
+            state->pc +=2;
             break;
         }
         case 0x0f:{
             state->a >>=1;
             state->cc.cy = (1==(state->a & 1));
+            state->pc++;
             break;
         }
         case 0x1a:{
             uint16_t offset = (state->d<<8) | state->e;
             state->a = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x1b:{
@@ -193,6 +214,7 @@ void Emulate8080(State8080* state){
             if(state->e == 0xff){
                 state->d--;
             }
+            state->pc++;
             break;
         }
         case 0x1c:{
@@ -201,6 +223,7 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x1d:{
@@ -209,25 +232,29 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
             
         }
         case 0x1e:{
             state->e = opcode[1];
+            state->pc++;
             break;
         }
         case 0x20:{
+            state->pc++;
             break;
         }
         case 0x21:{
             state->h = opcode[2];
             state->l = opcode[1];
-            state->pc+=2;
+            state->pc+=3;
             break;
         }
         case 0x23:{
             state->l++;
             if(state->l==0) state->h++;
+            state->pc++;
             break;
         }
         case 0x24:{
@@ -236,6 +263,7 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x25:{
@@ -244,14 +272,16 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;   
         }
         case 0x26:{
             state->h = opcode[1];
-            state->pc++;
+            state->pc+=2;
             break;
         }
         case 0x28:{
+            state->pc++;
             break;
         }
         case 0x29:{
@@ -260,13 +290,14 @@ void Emulate8080(State8080* state){
             state->h = (res&0xff00)>>8;
             state->l = res&0xff;
             state->cc.cy = ((res&0xffff0000)!=0);
+            state->pc++;
             break;
         }
         case 0x2a:{
             uint16_t offset = (opcode[2]<<8) | opcode[1];
             state->l = state->memory[offset];
             state->h = state->memory[offset+1];
-            state->pc+=2;
+            state->pc+=3;
             break;
         }
         case 0x2d:{
@@ -275,38 +306,53 @@ void Emulate8080(State8080* state){
             state->cc.z = res==0;
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
 
             break;
         }
         case 0x2e:{
             state->l = opcode[2];
+            state->pc++;
             break;
         }
         case 0x2f:{
             state->a!=state->a;
+            state->pc++;
             break;
         }
         case 0x30:{
+            state->pc++;
             break;
         }
         case 0x31:{
             state->sp = (opcode[2]<<8)|opcode[1];
-            state->pc+=2;
+            state->pc+=3;
             break;
         }
         case 0x32:{
             uint16_t offset = (opcode[2]<<8) | (opcode[1]);
             state->memory[offset] = state->a;
-            state->pc+=2;
+            state->pc+=3;
+            break;
+        }
+        case 0x35:{
+            uint16_t offset = state->h<<8 | state->l;
+            uint16_t res = state->memory[offset] -1;
+            state->memory[offset]-=1;
+            state->cc.z = res==0;
+            state->cc.s = (0x80==(res&0x80));
+            state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x36:{
             uint16_t offset = (state->h<<8) | state->l;
             state->memory[offset] = opcode[1];
-            state->pc+=1;
+            state->pc+=2;
             break;
         }
         case 0x38:{
+            state->pc++;
             break;
         }
         case 0x39:{
@@ -317,12 +363,13 @@ void Emulate8080(State8080* state){
 
             state->h = (result&0xff00) >> 8;
             state->l = (result&0xff);
+            state->pc++;
             break;
         }
         case 0x3a:{
             uint16_t offset = (opcode[2]<<8) | (opcode[1]);
             state->a = state->memory[offset];
-            state->pc+=2;
+            state->pc+=3;
             break;
         }
         case 0x3d:{
@@ -331,6 +378,7 @@ void Emulate8080(State8080* state){
             state->cc.z = (res==0);
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x3c:{
@@ -339,189 +387,248 @@ void Emulate8080(State8080* state){
             state->cc.z = res==0;
             state->cc.s = (0x80==(res&0x80));
             state->cc.p = Parity(res,8);
+            state->pc++;
             break;
         }
         case 0x3e:{
             state->a = opcode[1];
-            state->pc+=1;
+            state->pc+=2;
             break;
         }
         case 0x3f:{
             state->cc.cy!=state->cc.cy;
+            state->pc++;
             break;
         }
         case 0x40:{
             state->b = state->b;
+            state->pc++;
             break;
         }
         case 0x41:{
             state->b = state->c;
+            state->pc++;
             break;
         }
         case 0x42:{
             state->b = state->d;
+            state->pc++;
             break;
         }
         case 0x43:{
             state->b = state->e;
+            state->pc++;
             break;
         }
         case 0x44:{
             state->b = state->h;
+            state->pc++;
             break;
         }
         case 0x45:{
             state->b = state->l;
+            state->pc++;
             break;
         }
         case 0x46:{
             uint16_t offset = (state->h<<8) | state->l;
             state->c = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x47:{
             state->b = state->a;
+            state->pc++;
             break;
         }
         case 0x48:{
             state->c = state->b;
+            state->pc++;
             break;
         }
         case 0x49:{
             state->c = state->c;
+            state->pc++;
             break;
         }
         case 0x4a:{
             state->c = state->d;
+            state->pc++;
             break;
         }
         case 0x4b:{
             state->c = state->e;
+            state->pc++;
             break;
         }
         case 0x4c:{
             state->c = state->h;
+            state->pc++;
             break;
         }
         case 0x4d:{
             state->c = state->l;
+            state->pc++;
+            break;
+        }
+        case 0x4e:{
+            uint16_t offset = state->h<<8 | state->l;
+            state->c = state->memory[offset];
+            state->pc++;
+            break;
+        }
+        case 0x4f:{
+            state->c = state->a;
+            state->pc++;
             break;
         }
         case 0x50:{
             state->d = state->b;
+            state->pc++;
             break;
         }
         case 0x51:{
             state->d = state->c;
+            state->pc++;
             break;
         }
         case 0x52:{
             state->d = state->d;
+            state->pc++;
             break;
         }
         case 0x53:{
             state->d = state->e;
+            state->pc++;
+            break;
+        }
+        case 0x54:{
+            state->d=state->h;
+            state->pc++;
             break;
         }
         case 0x55:{
             state->d = state->l;
+            state->pc++;
             break;
         }
         case 0x56:{
             uint16_t offset = (state->h<<8) | state->l;
             state->d = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x58:{
             state->e = state->b;
+            state->pc++;
             break;
         }
         case 0x59:{
             state->e = state->c;
+            state->pc++;
             break;
         }
         case 0x5b:{
             state->e = state->e;
+            state->pc++;
             break;
         }
         case 0x5e:{
             uint16_t offset = (state->h<<8) | state->l;
             state->e = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x60:{
             state->h = state->b;
+            state->pc++;
             break;
         }
         case 0x61:{
             state->h = state->c;
+            state->pc++;
             break;
         }
         case 0x62:{
             state->h = state->d;
+            state->pc++;
             break;
         }
         case 0x64:{
             state->h = state->h;
+            state->pc++;
             break;
         }
         case 0x65:{
             state->h = state->l;
+            state->pc++;
             break;
         }
         case 0x66:{
             uint16_t offset = (state->h<<8) | state->l;
             state->h = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x67:{
             state->h = state->a;
+            state->pc++;
             break;
         }
         case 0x68:{
             state->l = state->b;
+            state->pc++;
             break;
         }
         case 0x69:{
             state->l = state->c;
+            state->pc++;
             break;
         }
         case 0x6c:{
             state->l = state->h;
+            state->pc++;
             break;
         }
         case 0x6d:{
             state->l = state->l;
+            state->pc++;
             break;
         }
         case 0x6e:{
             uint16_t offset = state->h<<8 | state->l;
             state->l = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x70:{
             uint16_t offset = state->h<<8 | state->l;
             state->memory[offset] = state->b;
+            state->pc++;
             break;
         }
         case 0x72:{
             uint16_t offset = state->h<<8 | state->l;
             state->memory[offset] = state->d;
+            state->pc++;
             break;
         }
         case 0x73:{
             uint16_t offset = state->h<<8 | state->l;
             state->memory[offset] = state->e;
+            state->pc++;
             break;
         }
         case 0x74:{
             uint16_t offset = state->h<<8 | state->l;
             state->memory[offset] = state->h;
+            state->pc++;
             break;
         }
         case 0x75:{
             uint16_t offset = state->h<<8 | state->l;
             state->memory[offset] = state->l;
+            state->pc++;
             break;
         }
         case 0x76:{
@@ -531,39 +638,48 @@ void Emulate8080(State8080* state){
         case 0x77:{
             uint16_t offset = (state->h<<8) | state->l;
             state->memory[offset] = state->a;
+            state->pc++;
             break;
         }
         case 0x78:{
             state->a = state->b;
+            state->pc++;
             break;
         }
         case 0x79:{
             state->a = state->c;
+            state->pc++;
             break;
         }
         case 0x7a:{ 
             state->a = state->d;
+            state->pc++;
             break;
         }
         case 0x7b:{
             state->a = state->e;
+            state->pc++;
             break;
         }
         case 0x7c:{
             state->a = state->h;
+            state->pc++;
             break;
         }
         case 0x7d:{
             state->a = state->l;
+            state->pc++;
             break;
         }
         case 0x7e:{
             uint16_t offset = (state->h<<8) | (state->l);
             state->a = state->memory[offset];
+            state->pc++;
             break;
         }
         case 0x7f:{
             state->a = state->a;
+            state->pc++;
             break;
         }
         case 0x80:{
@@ -583,6 +699,9 @@ void Emulate8080(State8080* state){
 
             state->cc.p = Parity(answer&0xff,8);
             state->a = answer & 0xff;
+            state->pc++;
+            
+            break;
         }
         case 0x81:{
             uint16_t answer = (uint16_t)state->a + (uint16_t)state->c;
@@ -591,30 +710,37 @@ void Emulate8080(State8080* state){
             state->cc.cy = ((answer>0xff));
             state->cc.p = Parity(answer&0xff,8);
             state->a = answer&0xff;
+            state->pc++;
+            break;
         }
         case 0x82:{
             state->a +=state->d;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x8b:{
             state->a = state->a + state->e + state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x8d:{
             state->a = state->a + state->l + state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x83:{
             state->a +=state->e;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x85:{
             state->a+=state->l;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x86:{
@@ -625,147 +751,189 @@ void Emulate8080(State8080* state){
             state->cc.cy =  (answer>0xff);
             state->cc.p = Parity(answer&0xff,8);
             state->a = answer&0xff;
+            state->pc++;
+            break;
         }
         case 0x88:{
             state->a = state->a + state->b + state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x89:{
             state->a = state->a + state->c + state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x8c:{
             state->a = state->a+state->h+state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x8e:{
             uint16_t offset = state->h<<8 | state->l;
             state->a = state->a + state->memory[offset] +   state->cc.cy;
+            state->pc++;
             break;
         }
         case 0x90:{
             state->a-=state->b;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x91:{
             state->a-=state->c;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x98:{
             state->a = state->a - state->b - state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0x9d:{
             state->a = state->a - state->l - state->cc.cy;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xa0:{
             state->a &= state->b;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xa5:{
             state->a&=state->l;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xa7:{
             state->a&=state->a;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xa8:{
             state->a^=state->b;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xa9:{
             state->a^=state->c;
             LogicFlagsA(state);
+            state->pc++;
+            break;
+        }
+        case 0xab:{
+            state->a^=state->e;
+            LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xac:{
             state->a^=state->h;
             LogicFlagsA(state);
+            state->pc++;
+            break;
+        }
+        case 0xad:{
+            state->a^=state->l;
+            LogicFlagsA(state);    
+            state->pc++;
             break;
         }
         case 0xaf:{
             state->a^=state->a;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb0:{
             state->a = state->a | state->b;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb4:{
             state->a|=state->h;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb5:{
             state->a = state->a | state->l;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb6:{
             uint16_t offset = state->h<<8 | state->l;
             state->a = state->a | *(&state->memory[offset]);
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb7:{
             state->a |= state->a;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb8:{
             state->a-=state->b;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xb9:{
             state->a-=state->c;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xba:{
             state->a-=state->d;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xbb:{
             state->a-=state->e;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xbc:{
             state->a-=state->h;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xbd:{
             state->a-=state->l;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xbe:{
             uint16_t offset = state->h<<8 | state->l;
             state->a = state->a - *(&state->memory[offset]);
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xbf:{
             state->a-=state->a;
             LogicFlagsA(state);
+            state->pc++;
             break;
         }
         case 0xc0:{
@@ -773,12 +941,14 @@ void Emulate8080(State8080* state){
                 state->pc = state->memory[state->sp+1]<<8 | state->memory[state->sp];
                 state->sp+=2;
             }
+            else state->pc++;
             break;
         }
         case 0xc1:{
             state->c = state->memory[state->sp];
             state->b = state->memory[state->sp+1];
             state->sp+=2;
+            state->pc++;
             break;
         }   
         case 0xc2:{
@@ -798,6 +968,7 @@ void Emulate8080(State8080* state){
             state->memory[state->sp-2] = state->c;
             state->memory[state->sp-1] = state->b;
             state->sp-=2;
+            state->pc++;
             break;
         }
         case 0xc6:{
@@ -807,7 +978,7 @@ void Emulate8080(State8080* state){
             state->cc.p = Parity((x&0xff), 8);
             state->cc.cy = (x > 0xff);
             state->a = (uint8_t) x;
-            state->pc++;
+            state->pc+=2;
             break;
         }
         case 0xc7:{
@@ -824,6 +995,7 @@ void Emulate8080(State8080* state){
                 state->pc = state->memory[state->sp+1]<<8 | state->memory[state->sp];
                 state->sp+=2;
             }
+            else state->pc++;
             break;
         }
         case 0xc9:{
@@ -834,34 +1006,61 @@ void Emulate8080(State8080* state){
         case 0xca:{
             if(state->cc.z){
                 state->pc = opcode[2]<<8|opcode[1];
-            }
+            }else state->pc++;
             break;
         }
         case 0xcd:{
-            uint16_t ret = state->pc+2;
-            state->memory[state->sp-1] = (ret >> 8) & 0xff;
-            state->memory[state->sp-2] = (ret & 0xff);
-            state->sp = state->sp - 2;
-            state->pc = (opcode[2] << 8) | opcode[1];
-            break;
+            printf("CALLING ADDR: %04x",opcode[2]<<8|opcode[1]);
+             #ifdef FOR_CPUDIAG    
+            if (5 ==  ((opcode[2] << 8) | opcode[1]))    
+            {    
+                if (state->c == 9)    
+                {    
+                    uint16_t offset = (state->d<<8) | (state->e);    
+                    char *str = &state->memory[offset+3];  //skip the prefix bytes    
+                    while (*str != '$')    
+                        printf("%c", *str++);    
+                    printf("\n");    
+                }    
+                else if (state->c == 2)    
+                {    
+                    //saw this in the inspected code, never saw it called    
+                    printf ("print char routine called\n");    
+                }    
+            }    
+            else if (0 ==  ((opcode[2] << 8) | opcode[1]))    
+            {    
+                exit(0);    
+            }    
+            else    
+   #endif    
+            {
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = (ret & 0xff);
+                state->sp = state->sp - 2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+                break;
+            }
         }
         case 0xd0:{
             if(state->cc.cy == 0){
                 state->pc = state->memory[state->sp+1] <<8 | state->memory[state->sp];
                 state->sp+=2;
-            }
+            }else state->pc++;
             break;
         }
         case 0xd1:{
             state->e = state->memory[state->sp];
             state->d = state->memory[state->sp+1];
             state->sp+=2;
+            state->pc++;
             break;
         }
         case 0xd2:{
             if(!state->cc.cy){
                 state->pc = opcode[2]<<8 | opcode[1];
-            }
+            }else state->pc++;
             break;
         }
         case 0xd3:{
@@ -872,13 +1071,14 @@ void Emulate8080(State8080* state){
             state->memory[state->sp-2] = state->e;
             state->memory[state->sp-1] = state->d;
             state->sp-=2;
+            state->pc++;
             break;
         }
         case 0xd8:{
             if(state->cc.cy){
                 state->pc = state->memory[state->sp+1] <<8 | state->memory[state->sp];
                 state->sp+=2;
-            }
+            }else state->pc++;
             break;
         }
         case 0xdd:{
@@ -888,36 +1088,44 @@ void Emulate8080(State8080* state){
             if(state->cc.p==0){
                 state->pc = state->memory[state->sp+1]<<8 | state->memory[state->sp];
                 state->sp+=2;
-            }
+            }else state->pc++;
             break;
         }
         case 0xe1:{
             state->l = state->memory[state->sp];
             state->h = state->memory[state->sp+1];
             state->sp+=2;
+            state->pc++;
             break;
         }
         case 0xe5:{
             state->memory[state->sp-2] = state->l;
             state->memory[state->sp-1] = state->h;
             state->sp-=2;
+            state->pc++;
             break;
         }
         case 0xe6:{
             state->a&=opcode[1];
             LogicFlagsA(state);
-            state->pc++;
+            state->pc+=2;
             break;
         }
         case 0xe8:{
             if(state->cc.p == 1){
                 state->pc = state->memory[state->sp+1]<<8 | state->memory[state->sp];
                 state->sp+=2;
-            }
+            }else state->pc++;
             break;
         }
         case 0xe9:{
             state->pc = state->h<<8 | state->l;
+            break;
+        }
+        case 0xea:{
+            if(state->cc.p){
+                state->pc = opcode[2]<<8 | opcode[1];
+            }else state->pc++;
             break;
         }
         case 0xeb:{
@@ -928,14 +1136,23 @@ void Emulate8080(State8080* state){
             uint8_t temp2 = state->l;
             state->l = state->e ;
             state->e = temp2;
+            state->pc++;
 
+            break;
+        }
+        case 0xef:{
+            uint16_t ret = state->pc+2;
+            state->memory[state->sp-1] = ret>>8 & 0xff;
+            state->memory[state->sp-2] = ret&0xff;
+            state->sp-=2;
+            state->pc = 0x28;
             break;
         }
         case 0xf0:{
             if(state->cc.s){
                 state->pc = state->memory[state->sp+1] <<8 | state->memory[state->sp];
                 state->sp+=2;
-            }
+            }else state->pc++;
             break;
         }
         case 0xf1:{
@@ -947,11 +1164,14 @@ void Emulate8080(State8080* state){
             state->cc.cy = (0x05 == (psw & 0x08));
             state->cc.ac = (0x10 == (psw & 0x10));
             state->sp += 2;
+            state->pc++;
+
+            break;
         }
         case 0xf2:{
             if(state->cc.p){
                 state->pc = opcode[2]<<8 | opcode[1];
-            }
+            }else state->pc++;
             break;
         }
         case 0xf5:{
@@ -963,26 +1183,29 @@ void Emulate8080(State8080* state){
                             state->cc.ac << 4 );
             state->memory[state->sp-2] = psw;
             state->sp-=2;
+            state->pc++;
             break;
         }
         case 0xf8:{
             if(state->cc.s == 1){
                 state->pc = (state->memory[state->sp+1]<<8) | state->memory[state->sp];
                 state->sp+=2;
-            }
+            }else state->pc++;
             break;
         }
         case 0xf9:{
             state->sp = state->h<<8 | state->l;
+            state->pc++;
             break;
         }
         case 0xfa:{
             if(state->cc.s){
                 state->pc = opcode[2]<<8 | opcode[1];
-            }
+            }else state->pc++;
             break;
         }
         case 0xfd:{
+            state->pc++;
             break;
         }
         case 0xfe:{
@@ -991,7 +1214,7 @@ void Emulate8080(State8080* state){
             state->cc.s = (0x80 == (x & 0x80));
             state->cc.p = Parity(x,8);
             state->cc.cy = (state->a < opcode[1]);
-            state->pc+=1;
+            state->pc+=2;
             break;
         }
         case 0xff:{
@@ -1020,6 +1243,7 @@ void Emulate8080(State8080* state){
 	printf("%c  ", state->cc.ac ? 'a' : '.');
 	printf("A $%04x B $%04x C $%04x D $%04x E $%04x H $%04x L $%04x SP %04x  PC %04x\n", state->a, state->b, state->c,
 				state->d, state->e, state->h, state->l, state->sp,state->pc);
+
 }
 
 State8080* Init8080(void){
