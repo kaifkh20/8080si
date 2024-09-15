@@ -1098,6 +1098,12 @@ void Emulate8080(State8080* state){
             state->pc++;
             break;
         }
+        case 0xe2:{
+            if(state->cc.p==0){
+                state->pc = opcode[2]<<8 |opcode[1];
+            }else state->pc++;
+            break;
+        }
         case 0xe5:{
             state->memory[state->sp-2] = state->l;
             state->memory[state->sp-1] = state->h;
@@ -1184,6 +1190,12 @@ void Emulate8080(State8080* state){
             state->memory[state->sp-2] = psw;
             state->sp-=2;
             state->pc++;
+            break;
+        }
+        case 0xf6:{
+            state->a|=opcode[1];
+            LogicFlagsA(state);
+            state->pc+=2;
             break;
         }
         case 0xf8:{
